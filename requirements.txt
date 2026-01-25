@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+faker
+openai
+langgraph
+langchain-openai
+langchain-community
