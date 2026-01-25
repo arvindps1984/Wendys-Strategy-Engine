@@ -18,14 +18,12 @@ from openai import OpenAI
 from datetime import date
 from langgraph.graph import StateGraph, START, END
 
-"""## UI CONFIGURATION"""
-
+# UI Configuration
 st.set_page_config(page_title="Wendy's FreshAi Strategy Board", layout="wide", page_icon="🍔")
 st.title("🍔 Wendy's FreshAi Strategy Board")
 st.markdown("### Synthesizing Market, Customer, and Competitive Intelligence")
 
-"""## AGENT STATE DEFINITION"""
-
+#Agent State Definition
 class MasterState(TypedDict):
     wendys_active: List[str]
     competitor_intel: dict  # Detailed metadata for traceability
@@ -36,8 +34,7 @@ class MasterState(TypedDict):
     final_report_text: str
     prioritization_table: pd.DataFrame
 
-"""## AGENT NODES (CORE LOGIC)"""
-
+# Agent Nodes
 def competitor_analyst_node(state: MasterState):
     """Calculates advanced Threat Scores: Saturation + Velocity + Recency Bias."""
     fake = Faker()
@@ -120,9 +117,7 @@ def visualization_node(state: MasterState):
     ]
     return {"prioritization_table": pd.DataFrame(table_data)}
 
-"""## APP ASSEMBLY (SIDEBAR & RUNTIME)"""
-
-"""## APP ASSEMBLY (SIDEBAR & RUNTIME)"""
+#"""APP ASSEMBLY (SIDEBAR & RUNTIME)"""
 
 st.sidebar.header("🔐 API Configuration")
 try:
