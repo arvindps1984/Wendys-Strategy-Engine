@@ -119,7 +119,7 @@ def visualization_node(state: MasterState):
 
 #"""APP ASSEMBLY (SIDEBAR & RUNTIME)"""
 
-st.sidebar.header("🔐 API Configuration")
+# st.sidebar.header("🔐 API Configuration")
 try:
     openai_api_key = st.secrets["TIGER_API_KEY"]
     client = OpenAI(api_key=openai_api_key, base_url="https://api.ai-gateway.tigeranalytics.com")
@@ -129,9 +129,9 @@ except Exception:
 
 # Ensure these widgets and the graph are defined outside the try block
 st.sidebar.divider()
-st.sidebar.header("🎯 Strategy Parameters")
+st.sidebar.header("🎯 Wendy's Active Promos")
 wendys_current = st.sidebar.multiselect(
-    "Wendy's Currently Active Promos",
+    "Select a Min of 1 or Max 3 promos",
     ["Biggie Bag", "4 for $4", "Breakfast 2 for $3", "BOGO Dave's Single"],
     default=["Biggie Bag", "4 for $4"]
 )
