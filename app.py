@@ -124,7 +124,7 @@ def visualization_node(state: MasterState):
 
 """## APP ASSEMBLY (SIDEBAR & RUNTIME)"""
 
-# 1. SECURE API CONFIGURATION
+st.sidebar.header("🔐 API Configuration")
 try:
     openai_api_key = st.secrets["TIGER_API_KEY"]
     client = OpenAI(api_key=openai_api_key, base_url="https://api.ai-gateway.tigeranalytics.com")
@@ -132,7 +132,7 @@ except Exception:
     st.error("🔑 API Key not found. Please configure TIGER_API_KEY in your Streamlit Secrets.")
     st.stop()
 
-# 2. DEFINE INPUT WIDGETS (Fixes the missing wendys_current variable)
+# Ensure these widgets and the graph are defined outside the try block
 st.sidebar.divider()
 st.sidebar.header("🎯 Strategy Parameters")
 wendys_current = st.sidebar.multiselect(
@@ -181,7 +181,7 @@ if st.sidebar.button("🚀 Generate Fresh Strategy"):
 
         for offer in result["structured_concepts"]:
             with st.expander(f"Offer: {offer['name']} ({offer['type']})", expanded=True):
-                st.write(offer["witty_rationale"])
+                st.write(offer["rationale"])
 
         st.divider()
 
