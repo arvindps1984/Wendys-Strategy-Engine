@@ -7,11 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1t1GxbwkzcYydt7BtlH8iSZ-qEye5dx2U
 """
 
-!pip install streamlit
-!pip install faker
-!pip install langchain-openai
-!pip install langchain-community
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -128,20 +123,14 @@ def visualization_node(state: MasterState):
 """## APP ASSEMBLY (SIDEBAR & RUNTIME)"""
 
 st.sidebar.header("🔐 API Configuration")
-api_key = st.sidebar.text_input("Enter TigerAnalytics API Key", type="password")
+try:
+    openai_api_key = st.secrets["TIGER_API_KEY"]
+    client = OpenAI(api_key=openai_api_key, base_url="https://api.ai-gateway.tigeranalytics.com")
+except Exception:
+    st.error("🔑 API Key not found. Please configure TIGER_API_KEY in your Streamlit Secrets.")
+    st.stop()
 
-if api_key:
-    client = OpenAI(api_key=api_key, base_url="https://api.ai-gateway.tigeranalytics.com")
-
-    st.sidebar.divider()
-    st.sidebar.header("🎯 Strategy Parameters")
-    wendys_current = st.sidebar.multiselect(
-        "Wendy's Currently Active Promos",
-        ["Biggie Bag", "4 for $4", "Breakfast 2 for $3", "BOGO Dave's Single"],
-        default=["Biggie Bag", "4 for $4"]
-    )
-
-    # Compile the Graph
+# Compile the Graph
     builder = StateGraph(MasterState)
     builder.add_node("comp", competitor_analyst_node)
     builder.add_node("cust", customer_analyst_node)
