@@ -122,7 +122,9 @@ def visualization_node(state: MasterState):
 
 """## APP ASSEMBLY (SIDEBAR & RUNTIME)"""
 
-st.sidebar.header("🔐 API Configuration")
+"""## APP ASSEMBLY (SIDEBAR & RUNTIME)"""
+
+# 1. SECURE API CONFIGURATION
 try:
     openai_api_key = st.secrets["TIGER_API_KEY"]
     client = OpenAI(api_key=openai_api_key, base_url="https://api.ai-gateway.tigeranalytics.com")
@@ -130,58 +132,66 @@ except Exception:
     st.error("🔑 API Key not found. Please configure TIGER_API_KEY in your Streamlit Secrets.")
     st.stop()
 
-# Compile the Graph
-    builder = StateGraph(MasterState)
-    builder.add_node("comp", competitor_analyst_node)
-    builder.add_node("cust", customer_analyst_node)
-    builder.add_node("trend", trend_analyst_node)
-    builder.add_node("design", offer_designer_node)
-    builder.add_node("validate", brand_validator_node)
-    builder.add_node("viz", visualization_node)
+# 2. DEFINE INPUT WIDGETS (Fixes the missing wendys_current variable)
+st.sidebar.divider()
+st.sidebar.header("🎯 Strategy Parameters")
+wendys_current = st.sidebar.multiselect(
+    "Wendy's Currently Active Promos",
+    ["Biggie Bag", "4 for $4", "Breakfast 2 for $3", "BOGO Dave's Single"],
+    default=["Biggie Bag", "4 for $4"]
+)
 
-    builder.add_edge(START, "comp"); builder.add_edge(START, "cust"); builder.add_edge(START, "trend")
-    builder.add_edge("comp", "design"); builder.add_edge("cust", "design"); builder.add_edge("trend", "design")
-    builder.add_edge("design", "validate"); builder.add_edge("validate", "viz"); builder.add_edge("viz", END)
-    agent_app = builder.compile()
+# 3. COMPILE THE GRAPH (Ensuring this is reached during runtime)
+builder = StateGraph(MasterState)
+builder.add_node("comp", competitor_analyst_node)
+builder.add_node("cust", customer_analyst_node)
+builder.add_node("trend", trend_analyst_node)
+builder.add_node("design", offer_designer_node)
+builder.add_node("validate", brand_validator_node)
+builder.add_node("viz", visualization_node)
 
-    if st.sidebar.button("🚀 Generate Fresh Strategy"):
-        with st.spinner("Executing multi-agent analysis..."):
-            result = agent_app.invoke({"wendys_active": wendys_current})
+builder.add_edge(START, "comp"); builder.add_edge(START, "cust"); builder.add_edge(START, "trend")
+builder.add_edge("comp", "design"); builder.add_edge("cust", "design"); builder.add_edge("trend", "design")
+builder.add_edge("design", "validate"); builder.add_edge("validate", "viz"); builder.add_edge("viz", END)
+agent_app = builder.compile()
 
-            # Row 1: Individual Agent Insights
-            st.markdown("## 🔎 Phase 1: Signal Intelligence")
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.info("**Competitor Threats**")
-                st.write(result["competitor_intel"]["summary"])
-            with col2:
-                st.success("**Customer Insights**")
-                st.write(result["customer_insights"])
-            with col3:
-                st.warning("**Market Trends**")
-                st.write(result["market_trends"])
+# 4. EXECUTION TRIGGER (Corrected indentation)
+if st.sidebar.button("🚀 Generate Fresh Strategy"):
+    with st.spinner("Executing multi-agent analysis..."):
+        result = agent_app.invoke({"wendys_active": wendys_current})
 
-            st.divider()
+        # Row 1: Individual Agent Insights
+        st.markdown("## 🔎 Phase 1: Signal Intelligence")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.info("**Competitor Threats**")
+            st.write(result["competitor_intel"]["summary"])
+        with col2:
+            st.success("**Customer Insights**")
+            st.write(result["customer_insights"])
+        with col3:
+            st.warning("**Market Trends**")
+            st.write(result["market_trends"])
 
-            # Row 2: Final Strategic Report
-            st.markdown("## ✨ Phase 2: Design & Brand Alignment")
-            st.write(f"*{result['final_report_text']}*")
+        st.divider()
 
-            for offer in result["structured_concepts"]:
-                with st.expander(f"Offer: {offer['name']} ({offer['type']})", expanded=True):
-                    st.write(offer["rationale"])
+        # Row 2: Final Strategic Report
+        st.markdown("## ✨ Phase 2: Design & Brand Alignment")
+        st.write(f"*{result['final_report_text']}*")
 
-            st.divider()
+        for offer in result["structured_concepts"]:
+            with st.expander(f"Offer: {offer['name']} ({offer['type']})", expanded=True):
+                st.write(offer["witty_rationale"])
 
-            # Row 3: Executive Scorecard
-            st.markdown("## 📊 Phase 3: Executive Prioritization Scorecard")
-            st.dataframe(
-                result["prioritization_table"].style.background_gradient(cmap='YlOrRd', subset=['Feasibility', 'Impact']),
-                use_container_width=True
-            )
-            st.balloons()
-else:
-    st.info("Please provide your API key in the sidebar to access the Strategy Board.")
+        st.divider()
+
+        # Row 3: Executive Scorecard
+        st.markdown("## 📊 Phase 3: Executive Prioritization Scorecard")
+        st.dataframe(
+            result["prioritization_table"].style.background_gradient(cmap='YlOrRd', subset=['Feasibility', 'Impact']),
+            use_container_width=True
+        )
+        st.balloons()
 
 
 
