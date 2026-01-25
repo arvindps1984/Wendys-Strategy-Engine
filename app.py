@@ -187,9 +187,24 @@ if st.sidebar.button("🚀 Generate Fresh Strategy"):
 
         # Row 3: Executive Scorecard
         st.markdown("## 📊 Phase 3: Executive Prioritization Scorecard")
+
+        # 1. Access the dataframe
+        df_scorecard = result["prioritization_table"]
+
+        # 2. Check if matplotlib is available before applying gradient
+        try:
+            styled_df = df_scorecard.style.background_gradient(
+                cmap='YlOrRd',
+                subset=['Feasibility', 'Impact']
+            )
+        except ImportError:# Catch broader issues including ImportError
+            # Fallback to plain dataframe if styling fails
+
+            styled_df = df_scorecard
+        # 3. Use the styled_df variable here!
         st.dataframe(
-            result["prioritization_table"].style.background_gradient(cmap='YlOrRd', subset=['Feasibility', 'Impact']),
-            use_container_width=True
+            styled_df,
+            width='stretch'
         )
         st.balloons()
 

@@ -6,3 +6,4 @@ openai
 langgraph
 langchain-openai
 langchain-community
+matplotlib
