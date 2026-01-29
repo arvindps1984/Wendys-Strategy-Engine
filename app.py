@@ -3,30 +3,25 @@ import pandas as pd
 from engine import get_strategy_app  # Imports the compiled LangGraph
 from openai import OpenAI
 
-# --- 1. UI CONFIGURATION ---
+# 1. Page Configuration: Start with the sidebar collapsed
 st.set_page_config(
     page_title="Wendy's FreshAi Strategy Board", 
     layout="wide", 
-    page_icon="🍔"
+    page_icon="🍔",
+    initial_sidebar_state="collapsed"
 )
 
-# Header Section matching your requested style (Screenshot 1)
-st.title("🍔 Wendy's Signal-to-Offer Engine")
-st.markdown("##### Turning market signals into launch-ready offers — with evidence.")
-st.write("This system converts fragmented market noise into prioritized, evidence-backed offers by orchestrating multiple AI agents across competition, customers, and trends.")
-
-st.divider()
-
-# --- 2. API CONFIGURATION (Sidebar) ---
-st.sidebar.header("🔐 API Configuration")
+# 2. Silent API Configuration (Logic only, no UI)
 try:
     openai_api_key = st.secrets["TIGER_API_KEY"]
     client = OpenAI(
         api_key=openai_api_key, 
         base_url="https://api.ai-gateway.tigeranalytics.com"
     )
+    # The app will continue execution if keys are found
 except Exception:
-    st.error("🔑 API Key not found. Please configure TIGER_API_KEY in Streamlit Secrets.")
+    # Error still displays on the main page if the keys are missing
+    st.error("🔑 API Key not found. Please ensure TIGER_API_KEY is set in your Streamlit Secrets.")
     st.stop()
 
 # --- 3. INITIALIZE ENGINE ---
