@@ -64,7 +64,7 @@ Hackathon: TigerAnalytics Hackathon 2026
 
 ### Project Architecture
 
-\```mermaid
+```mermaid
 
 graph TD
     %% Global Styling
