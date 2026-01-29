@@ -64,7 +64,8 @@ Hackathon: TigerAnalytics Hackathon 2026
 
 ### Project Architecture
 
-```mermaid
+\```mermaid
+
 graph TD
     %% Global Styling
     accTitle: Wendy's Signal-to-Offer Engine Architecture
