@@ -115,7 +115,7 @@ graph TD
     style Phase_1 fill:#FFF9C4,stroke:#FBC02D,stroke-width:4px,color:#000000,font-weight:bold;
     style Phase_2 fill:#E3F2FD,stroke:#1976D2,stroke-width:4px,color:#000000,font-weight:bold;
     style Phase_3 fill:#E8F5E9,stroke:#388E3C,stroke-width:4px,color:#000000,font-weight:bold;
-
+\'''
 👥 The Team
 Team Name: Team 13 - AI Alchemists
 Hackathon: TigerAnalytics Hackathon 2026
