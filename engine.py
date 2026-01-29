@@ -9,9 +9,9 @@ Original file is located at
 #1. Install Packages
 """
 
-!pip install langchain-openai
-!pip install langchain-community
-!pip install faker
+#!pip install langchain-openai
+#!pip install langchain-community
+#!pip install faker
 
 """# **2. Import and Setup**"""
 
