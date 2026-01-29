@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
-from engine import get_strategy_app  # Imports the compiled LangGraph
+from engine import get_strategy_app  # Ensure engine.py is in the same folder
 from openai import OpenAI
 
-# 1. Page Configuration: Start with the sidebar collapsed
+# --- 1. UI & PAGE CONFIGURATION ---
 st.set_page_config(
     page_title="Wendy's FreshAi Strategy Board", 
     layout="wide", 
@@ -11,25 +11,39 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# 2. Silent API Configuration (Logic only, no UI)
+# Custom CSS to completely hide the sidebar and the toggle arrow for a clean UI
+st.markdown("""
+    <style>
+        [data-testid="stSidebar"] {display: none;}
+        [data-testid="collapsedControl"] {display: none;}
+    </style>
+""", unsafe_allow_html=True)
+
+# --- 2. SILENT API CONFIGURATION ---
+# No sidebar elements. Logic runs silently; stops only if keys are missing.
 try:
     openai_api_key = st.secrets["TIGER_API_KEY"]
     client = OpenAI(
         api_key=openai_api_key, 
         base_url="https://api.ai-gateway.tigeranalytics.com"
     )
-    # The app will continue execution if keys are found
+    # Initialize the LangGraph engine
+    agent_app = get_strategy_app(client)
 except Exception:
-    # Error still displays on the main page if the keys are missing
     st.error("🔑 API Key not found. Please ensure TIGER_API_KEY is set in your Streamlit Secrets.")
     st.stop()
 
-# --- 3. INITIALIZE ENGINE ---
-# We get the compiled graph from engine.py, passing the API client
-agent_app = get_strategy_app(client)
+# --- 3. HEADER SECTION (Reflecting Screenshot 1) ---
+st.title("🍔 Wendy's Signal-to-Offer Engine")
+st.markdown("##### Turning market signals into launch-ready offers — with evidence.")
+st.write("This system converts fragmented market noise into prioritized, evidence-backed offers by orchestrating multiple AI agents across competition, customers, and trends.")
 
-# --- 4. MAIN PAGE INPUTS (Screenshot 2) ---
+st.divider()
+
+# --- 4. CONTEXT CONFIGURATION (Reflecting Screenshot 2) ---
 st.markdown("### 1️⃣ Configure Current Wendy’s Context")
+st.write("Select currently active Wendy's offers:")
+
 wendys_current = st.multiselect(
     "Select currently active Wendy's offers:",
     options=["Biggie Bag", "4 for $4", "Breakfast 2 for $3", "BOGO Dave's Single"],
@@ -37,9 +51,10 @@ wendys_current = st.multiselect(
     label_visibility="collapsed"
 )
 
+# Main page button for generation
 if st.button("🚀 Generate Offers"):
     with st.spinner("Executing multi-agent analysis..."):
-        # Invoke the compiled LangGraph engine
+        # Invoke the compiled LangGraph engine from engine.py
         result = agent_app.invoke({"wendys_active": wendys_current})
 
         # --- PHASE 1: SIGNAL INTELLIGENCE ---
@@ -64,7 +79,7 @@ if st.button("🚀 Generate Offers"):
         offers = result.get("structured_concepts", [])
         for offer in offers:
             with st.expander(f"Offer: {offer['name']} ({offer['type']})", expanded=True):
-                # Using .get for safety against LLM key variations
+                # Displays rationale with safety check for key names
                 st.write(offer.get("rationale", offer.get("witty_rationale", "No rationale provided.")))
 
         st.divider()
@@ -74,6 +89,7 @@ if st.button("🚀 Generate Offers"):
         
         df_scorecard = result.get("prioritization_table")
         if df_scorecard is not None:
+            # Heat-map styling for Feasibility and Impact
             st.dataframe(
                 df_scorecard.style.background_gradient(cmap='YlOrRd', subset=['Feasibility', 'Impact']),
                 use_container_width=True
