@@ -56,7 +56,68 @@ Setup:
 📊 Sample Output
 Defensive Concept: "Wendy's Streak Week" — Combines app-savviness with gamification to counter competitor loyalty threats.
 Strategic Pivot: "The Fresh Fry Subscription" — Leverages the subscription trend (+113% growth) where competition is currently low.
+Mermaid Diagram: 
+
+```mermaid
+graph TD
+    %% Global Styling
+    accTitle: Wendy's Signal-to-Offer Engine Architecture
+    accDescr: Multi-agent orchestration flow from signal to scorecard
+
+    %% Entry Point
+    Start([User Input: Active Promos]) --> UI[Streamlit Frontend]
+    UI --> StateInit{Initialize MasterState}
+
+    %% Phase 1: Signal Intelligence (Parallel Fan-Out)
+    subgraph Phase_1 [Phase 1: Signal Intelligence]
+        direction LR
+        StateInit --> Comp[Competitor Analyst Agent]
+        StateInit --> Cust[Customer Insights Agent]
+        StateInit --> MktGen[Market Context Generator]
+        
+        MktGen --> MktCtx[Market Context Analyst]
+        MktCtx --> Trend[Market Trends Narrator]
+    end
+
+    %% Sync point
+    Comp --> Sync{Sync Intelligence}
+    Cust --> Sync
+    Trend --> Sync
+
+    %% Phase 2: Design & Brand (Sequential Fan-In)
+    subgraph Phase_2 [Phase 2: Design & Brand Alignment]
+        Sync --> Designer[Offer Designer Agent]
+        Designer -- "Raw Offer Concepts" --> Validator[Brand Validator Agent]
+        Validator -- "Witty Rationale & JSON" --> Finalize[Finalize State]
+    end
+
+    %% Phase 3: Executive Review
+    subgraph Phase_3 [Phase 3: Executive Scorecard]
+        Finalize --> Viz[Visualization Node]
+        Viz -- "Prioritization Table" --> Dashboard[Streamlit Dashboard]
+    end
+
+    %% End Result
+    Dashboard --> End([Final Strategy & Balloons])
+
+    %% High-Contrast Class Definitions
+    classDef default fill:#FFFFFF,stroke:#333333,stroke-width:2px,color:#000000;
+    classDef startNode fill:#FFDDE1,stroke:#EE2737,stroke-width:3px,color:#000000,font-weight:bold;
+    classDef agentNode fill:#F0F4C3,stroke:#827717,stroke-width:2px,color:#000000;
+    classDef syncNode fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#000000;
+
+    %% Applying Classes
+    class Start,End startNode;
+    class Comp,Cust,MktGen,MktCtx,Trend,Designer,Validator,Viz agentNode;
+    class Sync,StateInit syncNode;
+
+    %% Subgraph (Phase) Branding with High Contrast
+    style Phase_1 fill:#FFF9C4,stroke:#FBC02D,stroke-width:4px,color:#000000,font-weight:bold;
+    style Phase_2 fill:#E3F2FD,stroke:#1976D2,stroke-width:4px,color:#000000,font-weight:bold;
+    style Phase_3 fill:#E8F5E9,stroke:#388E3C,stroke-width:4px,color:#000000,font-weight:bold;
 
 👥 The Team
 Team Name: Team 13 - AI Alchemists
 Hackathon: TigerAnalytics Hackathon 2026
+
+
