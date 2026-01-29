@@ -134,28 +134,41 @@ def offer_designer_node(state: MasterState, client: OpenAI):
     return {"raw_concepts": res.choices[0].message.content}
 
 def brand_validator_node(state: MasterState, client: OpenAI):
-    """Refines concepts and strictly enforces the JSON keys for the scorecard."""
+    """Refines concepts into brand voice and strictly enforces the JSON structure."""
     prompt = f"""
-    Refine these concepts with Wendy's witty brand voice: {state['raw_concepts']}
-    
-    RETURN ONLY A JSON OBJECT with these exact keys for each offer:
-    - 'name'
-    - 'witty_rationale'
-    - 'type'
-    - 'feasibility' (0-10 score)
-    - 'impact' (0-10 score)
-    """
-    res = client.chat.completions.create(
-        model=MODEL_NAME,
-        response_format={ "type": "json_object" },
-        messages=[{"role": "user", "content": prompt}]
-    )
-    data = json.loads(res.choices[0].message.content)
-    return {
-        "structured_concepts": data.get("offers", []), 
-        "final_report_text": data.get("report_intro", "")
-    }
+    Refine these concepts into Wendy's witty, fresh brand voice: {state['raw_concepts']}
 
+    YOU MUST RETURN A JSON OBJECT WITH EXACTLY THESE TWO TOP-LEVEL KEYS:
+    1. 'report_intro': A 2-sentence witty overall summary.
+    2. 'offers': A list of objects, each containing: 
+       'name', 'rationale', 'type', 'feasibility' (1-10), 'impact' (1-10).
+    """
+    
+    try:
+        res = client.chat.completions.create(
+            model=MODEL_NAME,
+            response_format={"type": "json_object"},
+            messages=[{"role": "user", "content": prompt}]
+        )
+        # Parse the JSON response
+        data = json.loads(res.choices[0].message.content)
+        
+        # Safety check: Ensure 'data' is a dictionary and contains 'offers'
+        if not isinstance(data, dict):
+            raise ValueError("LLM did not return a dictionary")
+            
+        return {
+            "structured_concepts": data.get("offers", []), 
+            "final_report_text": data.get("report_intro", "Strategy generated successfully.")
+        }
+        
+    except Exception as e:
+        # Fallback logic to prevent the app from crashing
+        st.error(f"⚠️ Brand Validation Error: {e}")
+        return {
+            "structured_concepts": [], 
+            "final_report_text": "Error refining strategy voice. Please try again."
+        }
 def visualization_node(state: MasterState):
     """Dynamically builds a prioritization table with safety checks for missing keys."""
     concepts = state.get("structured_concepts", [])
