@@ -134,18 +134,49 @@ def offer_designer_node(state: MasterState, client: OpenAI):
     return {"raw_concepts": res.choices[0].message.content}
 
 def brand_validator_node(state: MasterState, client: OpenAI):
-    """Refines concepts into brand voice and structured JSON."""
-    prompt = f"Refine these into Wendy's witty voice and return JSON with keys 'report_intro' and 'offers': {state['raw_concepts']}"
-    res = client.chat.completions.create(model=MODEL_NAME, response_format={"type": "json_object"}, messages=[{"role": "user", "content": prompt}])
+    """Refines concepts and strictly enforces the JSON keys for the scorecard."""
+    prompt = f"""
+    Refine these concepts with Wendy's witty brand voice: {state['raw_concepts']}
+    
+    RETURN ONLY A JSON OBJECT with these exact keys for each offer:
+    - 'name'
+    - 'witty_rationale'
+    - 'type'
+    - 'feasibility' (0-10 score)
+    - 'impact' (0-10 score)
+    """
+    res = client.chat.completions.create(
+        model=MODEL_NAME,
+        response_format={ "type": "json_object" },
+        messages=[{"role": "user", "content": prompt}]
+    )
     data = json.loads(res.choices[0].message.content)
-    return {"structured_concepts": data["offers"], "final_report_text": data["report_intro"]}
+    return {
+        "structured_concepts": data.get("offers", []), 
+        "final_report_text": data.get("report_intro", "")
+    }
 
 def visualization_node(state: MasterState):
-    """Builds the prioritization table."""
-    table_data = [
-        {"Concept": item["name"], "Feasibility": item["feasibility"], "Impact": item["impact"], "Type": item["type"]}
-        for item in state["structured_concepts"]
-    ]
+    """Dynamically builds a prioritization table with safety checks for missing keys."""
+    concepts = state.get("structured_concepts", [])
+    
+    table_data = []
+    for item in concepts:
+        # Use .get() to avoid KeyError if the LLM misses a field
+        name = item.get("name", "Unnamed Concept")
+        feasibility = item.get("feasibility", 5.0) # Default to 5.0 if missing
+        impact = item.get("impact", 5.0)
+        ctype = item.get("type", "N/A")
+        
+        table_data.append({
+            "Concept": name,
+            "Feasibility": feasibility,
+            "Impact": impact,
+            "Confidence": round((impact + feasibility) / 20, 2),
+            "Type": ctype
+        })
+
+    # Return the DataFrame for the scorecard
     return {"prioritization_table": pd.DataFrame(table_data)}
 
 # --- GRAPH ASSEMBLY FUNCTION ---
