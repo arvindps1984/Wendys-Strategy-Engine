@@ -13,7 +13,7 @@ Original file is located at
 #!pip install langchain-community
 #!pip install faker
 
-"""# **2. Import and Setup**"""
+#"""# **2. Import and Setup**"""
 
 import pandas as pd # For data manipulation and analysis
 import numpy as np # For numerical operations
@@ -37,7 +37,7 @@ TODAY = date(2026, 1, 24)
 # Define the model name to be used for LLM calls
 MODEL_NAME = "gemini-2.5-flash"
 
-"""#3. Define Master State for the System"""
+#"""#3. Define Master State for the System"""
 
 # Define the master state for the entire system using TypedDict for schema enforcement
 class MasterState(TypedDict):
@@ -64,10 +64,10 @@ TREND_MECHANIC_MAP = {
     "App-Exclusive Perks": "mobile-only gated access"
 }
 
-"""#4. Agent #1 - Building Competitor Intelligence Agent
+#"""#4. Agent #1 - Building Competitor Intelligence Agent
 
 ### 4a. Define the Nodes - Competitor Intelligence Logic
-"""
+#"""
 
 def competitor_analyst_node(state: MasterState):
     """Calculates advanced Threat Scores: Saturation + Velocity + Recency Bias for competitor offers."""
