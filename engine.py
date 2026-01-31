@@ -136,18 +136,106 @@ def competitor_analyst_node(state: MasterState):
 
 ### 5a. Define the Nodes - Customer Insights Logic
 
-def customer_analyst_node(state: MasterState):
+from faker import Faker
+import random
+import json
+from collections import Counter
+
+fake = Faker()
+random.seed(42)  # Deterministic output
+
+def customer_analyst_node(state: "MasterState"):
     """Analyzes behavioral signals to identify high-redemption segments and customer preferences."""
 
     print("✅ Customer Analyst RUNNING")
 
-    # (Simplified internal analysis based on provided feedback templates for demonstration)
-    insights = [
-        "Value-Oriented Mobile Users redeem app offers 1.002x more often.",
-        "Efficient Drive-Thru Diners redeem 1.004x more often via Drive-Thru."
-    ]
-    # Return the aggregated customer insights as a single string
-    return {"customer_insights": "\n".join(insights)}
+    """
+    Customer Insight Agent (Hybrid, Hallucination-Safe)
+
+    Step 1: Generate synthetic data
+    Step 2: Compute metrics deterministically (no LLM)
+    Step 3: Ask LLM ONLY to summarize provided metrics
+    """
+
+    # ---------------------------------------------------
+    # 1. SYNTHETIC SIGNAL GENERATION (NEUTRAL)
+    # ---------------------------------------------------
+    sample_size = 100
+    logs = []
+
+    for _ in range(sample_size):
+        logs.append({
+            "customer_type": random.choice(
+                ["Loyalty Member", "Guest", "First-Timer"]
+            ),
+            "channel": random.choice(
+                ["Mobile App", "Drive-Thru", "In-Store"]
+            ),
+            "coupon_used": random.choice([True, False])
+        })
+
+    # ---------------------------------------------------
+    # 2. METRIC COMPUTATION (SOURCE OF TRUTH)
+    # ---------------------------------------------------
+    redeemed_logs = [l for l in logs if l["coupon_used"]]
+
+    if not redeemed_logs:
+        return {
+            "customer_insights": "No coupon redemptions observed in the synthetic sample."
+        }
+
+    total_redemptions = len(redeemed_logs)
+
+    segment_counts = Counter(l["customer_type"] for l in redeemed_logs)
+    channel_counts = Counter(l["channel"] for l in redeemed_logs)
+
+    metrics = {
+        "total_redemptions": total_redemptions,
+        "segment_share": {
+            seg: round(cnt / total_redemptions, 3)
+            for seg, cnt in segment_counts.items()
+        },
+        "channel_share": {
+            ch: round(cnt / total_redemptions, 3)
+            for ch, cnt in channel_counts.items()
+        }
+    }
+
+    # ---------------------------------------------------
+    # 3. LLM NARRATION (STRICTLY BOUND)
+    # ---------------------------------------------------
+    analysis_prompt = f"""
+You are a Customer Insights Analyst.
+
+IMPORTANT RULES:
+- Use ONLY the metrics provided below.
+- Do NOT infer causes, preferences, or intent.
+- Do NOT introduce new numbers or segments.
+- Use descriptive language only (e.g., "accounts for", "observed share").
+
+Metrics (synthetic data):
+{json.dumps(metrics, indent=2)}
+
+Write 3 concise bullet-point insights suitable for an executive summary.
+"""
+
+    res = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=[{"role": "user", "content": analysis_prompt}],
+        temperature=0  # Minimizes creativity
+    )
+
+    # ---------------------------------------------------
+    # 4. AGENT OUTPUT
+    # ---------------------------------------------------
+    return {
+        "customer_insights": res.choices[0].message.content,
+        "metrics": metrics,
+        "data_disclaimer": (
+            "Insights are based on synthetic data and "
+            "are descriptive only."
+        )
+    }
 
 #6. Agent #3 - Building Market Trends Agent
 
@@ -250,7 +338,7 @@ def market_context_analyst(state: MasterState):
 def market_trends_narrator(state: MasterState):
     context = json.dumps(state["market_context_windows"], indent=2)
 
-    print("✅ market_trends_narrator RUNNING")
+    print("✅ Market Trends Narrator RUNNING")
 
     prompt = f"""
     You are Wendy’s Market Strategist.
